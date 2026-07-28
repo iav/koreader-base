@@ -114,7 +114,7 @@ local has_statvfs = pcall(function() return C.statvfs ~= nil end)
 function util.df(path)
     if not has_statvfs then return nil, "statvfs is not available" end
     local statvfs = ffi.new("struct statvfs")
-    if C.statvfs(path, statvfs) ~= 0 then return nil, posix.strerror() end
+    if C.statvfs(path, statvfs) ~= 0 then return nil, "statvfs: " .. posix.strerror() end
     -- The block counts are in f_frsize units, which is not always f_bsize.
     local frsize = tonumber(statvfs.f_frsize)
     return tonumber(statvfs.f_blocks) * frsize,
