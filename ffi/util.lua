@@ -110,11 +110,11 @@ local has_statvfs = pcall(function() return C.statvfs ~= nil end)
 
 --- Size, free space and available space of the filesystem holding path, in bytes.
 -- Available is what df reports in that column: free space less the blocks kept
--- back for root. Returns nil if the filesystem cannot be queried.
+-- back for root. Returns nil plus a message if the filesystem cannot be queried.
 function util.df(path)
-    if not has_statvfs then return nil end
+    if not has_statvfs then return nil, "statvfs is not available" end
     local statvfs = ffi.new("struct statvfs")
-    if C.statvfs(path, statvfs) ~= 0 then return nil end
+    if C.statvfs(path, statvfs) ~= 0 then return nil, posix.strerror() end
     -- The block counts are in f_frsize units, which is not always f_bsize.
     local frsize = tonumber(statvfs.f_frsize)
     return tonumber(statvfs.f_blocks) * frsize,
